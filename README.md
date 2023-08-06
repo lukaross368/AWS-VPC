@@ -1,18 +1,14 @@
 
-![vpc.drawio](vpc.drawio.png)
-## Architecture Overview 
+## Architecture Overview
 
 Custom VPC spanning 2 availability zones with a total of 2 public subnets and 2 private subnets.
-
 Internet Gateway for routing traffic to the public facing application load balancer which then forwards traffic to EC2 Instances running in private subnets. 
-
 Each EC2 is running docker and a single container. Container is running an Nginx web server hosting a static HTML file.
-
 Single EC2 instance running in Public-2A to act as a jump server to allow for manual configuration of the EC2 application servers.
-
 Also running a NAT gateway so EC2 instances in private subnets can send requests to the internet in order to pull docker binaries. 
-
 Test html app by hitting the LB here: http://my-alb-766802215.eu-west-2.elb.amazonaws.com/
+
+![vpc.drawio](vpc.drawio.png)
 
 ## VPC Information
 

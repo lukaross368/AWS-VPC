@@ -2,17 +2,15 @@
 ## Architecture Overview
 
 Custom VPC spanning 2 availability zones with a total of 2 public subnets and 2 private subnets.
-Internet Gateway for routing traffic to the public facing application load balancer which then forwards traffic to EC2 Instances running in private subnets. 
 
-Each EC2 is running docker and a single container. Container is running an Nginx web server hosting a static HTML file.
-Single EC2 instance running in Public-2A to act as a jump server to allow for manual configuration of the EC2 application servers.
-Also running a NAT gateway so EC2 instances in private subnets can send requests to the internet in order to pull docker binaries. 
+Inbound Traffic from the Internet goes via a Network LB with a static IPV4 Address which is then routed
+to a Application LB which distrubutes traffic across Web APPs in private subnets.
 
-Test html app by hitting the LB here: http://my-alb-766802215.eu-west-2.elb.amazonaws.com/
+One jump server running in a public subnet is used for deployment.
 
 ![vpc.drawio](vpc.drawio.png)
 
-## VPC Information
+<!-- ## VPC Information
 
 In this section find the info regarding the VPC setup and its components. 
 ### CIDR Block
@@ -100,4 +98,4 @@ First create a Target group that includes both HTML App instances (HTML App grou
 - public facing
 - Spanning both availability zones (Public-2A, Public-2B)
 - Forward to target 'HTML App group' , HTTP traffic on port 80
-- Security Group: public web
+- Security Group: public web -->

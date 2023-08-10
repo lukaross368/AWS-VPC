@@ -46,6 +46,12 @@ resource "aws_eip" "nat_eip" {
   depends_on = [aws_internet_gateway.ig]
 }
 
+/* Elastic IP for Network Load Balancer*/
+resource "aws_eip" "nlb_eip" {
+  domain = "vpc"
+  depends_on = [aws_internet_gateway.ig]
+}
+
 /* NAT Gateway */
 resource "aws_nat_gateway" "nat" {
   allocation_id = aws_eip.nat_eip.id
@@ -124,9 +130,17 @@ resource "aws_security_group" "default" {
   }
 }
 
-/* web-app-sg */
-
 /* jump-server-sg */
 
 /* alb-sg */
+
+/* web-app-sg */
+resource "aws_security_group" "web-app-sg" {
+  name = "terraform-web-app-sg"
+  description = "security group for web app instances"
+  vpc_id = "${aws_vpc.vpc.id}"
+  depends_on = [aws_vpc.vpc, ]
+}
+
+
 

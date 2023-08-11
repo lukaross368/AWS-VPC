@@ -10,6 +10,22 @@ One jump server running in a public subnet is used for deployment.
 
 ![vpc.drawio](vpc.drawio.png)
 
+## Steps To Spin up the Infrastructure
+
+- install terraform and AWS CLI locally  
+- run AWS Configure and set access credentials to your .aws/credentials file and your region to your .aws/config file (if you are using a region other than eu-west-2 you will need to change the instance amis in this repo)
+- update /terraform/provider.tf in this repo to make sure the shared_credentials_files are using your own path.
+- make sure the key pair you want to use for the EC2 Instances is in your .ssh directory and is named mykeypair.pem or Change the Code in /terrafor/modules/deployments/main.tf to match the name of your keypair
+- run `terraform init` inside the /terraform directory
+- run `terraform plan` and then `terraform apply` to spin up the infra 
+
+Once the Infrastructure is running you can use the provided deploy.sh script in the root directory of this repo to deploy the hello world html app (project files found in the vpc_webapp directory)
+
+
+## Other Details
+
+TODO: Include details of network infra, ec2 instances and lbs
+
 <!-- ## VPC Information
 
 In this section find the info regarding the VPC setup and its components. 
@@ -75,17 +91,6 @@ This instance is used as a connection proxy in order to configure private resour
 - security group: my-html-app-server-sg
 
 These instances are used to run an Nginx web server hosting a static html file. Using the jump server as a proxy, first I connected via SSH and downloaded docker binaries on each instance using the following commands.
-
-
-```shell
-sudo yum update -y 
-sudo yum install docker
-sudo service docker start
-sudo usermod -a -G docker ec2-user
-sudo curl -l https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname%20-s)-$(uname%20-m)%20-o%20/usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
-```
-
 
 Then I copied the necessary files to the respective EC2 instances to run the web app using the deploy.sh shell script found in this repo.
 

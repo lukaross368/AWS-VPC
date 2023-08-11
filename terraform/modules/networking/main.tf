@@ -106,14 +106,14 @@ resource "aws_route_table_association" "private" {
   route_table_id = "${aws_route_table.private.id}"
 }
 
-/* Securtiy Groups */
+/*==Securtiy Groups==*/
 
 /* default sg */
 resource "aws_security_group" "default" {
-  name = "default-sg"
+  name = "terraform-default-sg"
   description = "Default security group to allow inbound/outbound from the VPC"
   vpc_id = "${aws_vpc.vpc.id}"
-  depends_on = [aws_vpc.vpc]
+  depends_on = [ aws_vpc.vpc ]
   
   ingress {
     from_port = "0"
@@ -131,15 +131,81 @@ resource "aws_security_group" "default" {
 }
 
 /* jump-server-sg */
+resource "aws_security_group" "jump-server-sg" {
+
+  name = "terraform-jump-server-sg"
+  description = "Security group for jump server"
+  vpc_id = "${aws_vpc.vpc.id}"
+  depends_on = [ aws_vpc.vpc ]
+
+  # TODO: Improve security rules here
+  ingress {
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # TODO: Improve security rules here
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
 
 /* alb-sg */
+resource "aws_security_group" "alb-sg" {
+  name = "terraform-alb-sg"
+  description = "Security group for application load balancer"
+  vpc_id = "${aws_vpc.vpc.id}"
+  depends_on = [ aws_vpc.vpc ]
+
+  # TODO: Improve security rules here
+  ingress {
+    from_port = "0"
+    to_port = "0"
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  
+  # TODO: Improve security rules here
+  egress {
+    from_port = "0"
+    to_port = "0"
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
 
 /* web-app-sg */
 resource "aws_security_group" "web-app-sg" {
   name = "terraform-web-app-sg"
   description = "security group for web app instances"
   vpc_id = "${aws_vpc.vpc.id}"
-  depends_on = [aws_vpc.vpc, ]
+  depends_on = [aws_vpc.vpc, aws_security_group.alb-sg, aws_security_group.jump-server-sg]
+
+  ingress {
+    from_port = 22
+    to_port = 22
+    protocol = "TCP"
+    security_groups = [aws_security_group.jump-server-sg.id]
+  }
+
+  ingress {
+    from_port = 80
+    to_port = 80
+    protocol = "TCP"
+    security_groups = [aws_security_group.alb-sg.id]
+  }
+
+  egress {
+    from_port = "0"
+    to_port = "0"
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
 

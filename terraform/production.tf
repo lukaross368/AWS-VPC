@@ -79,11 +79,10 @@ resource "aws_lb_listener" "application" {
 resource "aws_lb_target_group_attachment" "ec2_to_alb_target" {
   count = "${length(module.networking.private_subnet_ids)}"
   depends_on = [ aws_instance.web-app, aws_lb.application ]
-  target_group_arn = aws_lb_target_group.application
-  target_id = "${element(aws_instance.web-app.id, count.index)}" 
+  target_group_arn = aws_lb_target_group.application.arn
+  target_id = "${element(aws_instance.web-app, count.index).id}" 
   port = 80
 }
-
 
 /* Network Load Balancer (NLB) */
 resource "aws_lb" "network" {
@@ -92,13 +91,11 @@ resource "aws_lb" "network" {
   load_balancer_type = "network"
   subnets = [ module.networking.public_subnet_ids[1] ]
   enable_cross_zone_load_balancing = true
-}
 
-/* Elastic IP Attachment for NLB */
-resource "aws_lb_attachment" "network_eip_attachment" {
-  depends_on = [ aws_lb.network ]
-  lb_arn = aws_lb.network.arn
-  elastic_ip = module.networking.network_lb_elastic_ip
+  subnet_mapping {
+    subnet_id = module.networking.public_subnet_ids[1]
+    allocation_id = module.networking.network_lb_elastic_ip
+  }
 }
 
 /* Listeners for Network Load Balancer */
@@ -110,7 +107,7 @@ resource "aws_lb_listener" "network" {
 
   default_action {
     type = "forward"
-    target_group_arn = aws_lb_target_group.network.arn
+    target_group_arn = aws_lb_target_group.nlb-target-group.arn
   }
 }
 
@@ -125,7 +122,7 @@ resource "aws_lb_target_group" "nlb-target-group" {
 /* Attachment for NLB Target Group */ 
 resource "aws_lb_target_group_attachment" "alb_to_nlb" {
   depends_on = [ aws_lb_target_group.nlb-target-group, aws_lb.application, aws_lb.network ]
-  target_group_arn = aws_lb_target_group.network.arn
+  target_group_arn = aws_lb_target_group.nlb-target-group.arn
   target_id = aws_lb.application.id
   port = 80
 }

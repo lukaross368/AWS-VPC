@@ -89,7 +89,6 @@ resource "aws_lb" "network" {
   name = "terraform-nlb"
   internal = false
   load_balancer_type = "network"
-  subnets = [ module.networking.public_subnet_ids[1] ]
   enable_cross_zone_load_balancing = true
 
   subnet_mapping {
@@ -123,7 +122,8 @@ resource "aws_lb_target_group" "nlb-target-group" {
 resource "aws_lb_target_group_attachment" "alb_to_nlb" {
   depends_on = [ aws_lb_target_group.nlb-target-group, aws_lb.application, aws_lb.network ]
   target_group_arn = aws_lb_target_group.nlb-target-group.arn
-  target_id = aws_lb.application.id
+  target_id = aws_lb.application.arn
   port = 80
 }
+
 

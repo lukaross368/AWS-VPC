@@ -13,9 +13,9 @@ output "private_subnet_ids" {
   value = "${aws_subnet.private_subnet[*].id}"
 }
 
-output "network_lb_elastic_ip" {
+output "network_lb_elastic_ip_id" {
   description = "Value of Elastic IP address for network lb"
-  value = "${aws_eip.nlb_eip.address}"
+  value = aws_eip.nlb_eip.id
 }
 
 output "jump_server_sg_id" {

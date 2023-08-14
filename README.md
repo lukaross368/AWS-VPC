@@ -19,7 +19,10 @@ One jump server running in a public subnet is used for deployment.
 - run `terraform init` inside the /terraform directory
 - run `terraform plan` and then `terraform apply` to spin up the infra 
 
-Once the Infrastructure is running you can use the provided deploy.sh script in the root directory of this repo to deploy the hello world html app (project files found in the vpc_webapp directory)
+
+## Deploy Static HTML Application
+
+- run `sh copyFilesAndExecuteDeploy.sh <PathToKeyPair> <PathToWebAppFiles> <PathToDepoyScript> <JumpServerHostName> <Bank0HostName> <Bank1HostName>` making sure to replace the args. This will copy the html application files, your key pair and Deploy Script to the jump server and execute the deploy script, deploying and starting the html application on both banks.
 
 
 ## Other Details

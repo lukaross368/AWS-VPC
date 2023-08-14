@@ -93,13 +93,18 @@ resource "aws_lb" "network" {
 
   subnet_mapping {
     subnet_id = module.networking.public_subnet_ids[1]
-    allocation_id = module.networking.network_lb_elastic_ip
+    allocation_id = module.networking.network_lb_elastic_ip_id
   }
 }
 
 /* Listeners for Network Load Balancer */
-resource "aws_lb_listener" "network" {
-  depends_on = [ aws_lb_target_group.nlb-target-group, aws_lb.network ]
+resource "aws_lb_listener" "network_with_alb_forwarding" {
+  depends_on = [
+    aws_lb_target_group.nlb-target-group,
+    aws_lb.network,
+    aws_lb_listener.application,
+  ]
+  
   load_balancer_arn = aws_lb.network.arn
   port = "80"
   protocol = "TCP"
@@ -112,18 +117,17 @@ resource "aws_lb_listener" "network" {
 
 /* Create Target Group for NLB */
 resource "aws_lb_target_group" "nlb-target-group" {
-  name     = "terraform-nlb-target-group"
-  port     = 80
+  name = "terraform-nlb-target-group"
+  target_type = "alb"
+  port = 80
   protocol = "TCP"
   vpc_id   = module.networking.vpc_id
 }
 
-/* Attachment for NLB Target Group */ 
-resource "aws_lb_target_group_attachment" "alb_to_nlb" {
-  depends_on = [ aws_lb_target_group.nlb-target-group, aws_lb.application, aws_lb.network ]
+/* Attach ALB to Target Group of NLB */
+resource "aws_lb_target_group_attachment" "alb_to_nlb_target" {
   target_group_arn = aws_lb_target_group.nlb-target-group.arn
-  target_id = aws_lb.application.arn
+  target_id = aws_lb.application.id
   port = 80
+  depends_on = [aws_lb_listener.network_with_alb_forwarding]
 }
-
-
